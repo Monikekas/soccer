@@ -11,7 +11,51 @@ services:
       - "1433:1433"
     volumes:
       - sql_server_data:/var/opt/mssql
+    healthcheck:
+      test:
+        - CMD
+        - /opt/mssql-tools18/bin/sqlcmd
+        - -S
+        - localhost
+        - -U
+        - sa
+        - -C
+        - -Q
+        - "SELECT 1"
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
     restart: unless-stopped
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools:latest
+    environment:
+      DB_PASSWORD: "${DB_PASSWORD:?Define DB_PASSWORD en .env}"
+    volumes:
+      - ./DB/db_soccer.sql:/scripts/db_soccer.sql:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        SQLCMD=/opt/mssql-tools/bin/sqlcmd
+
+        until "$$SQLCMD" -S db -U sa -P "$$DB_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; do
+          echo "Esperando SQL Server..."
+          sleep 3
+        done
+
+        EXISTS=$$("$$SQLCMD" -S db -U sa -P "$$DB_PASSWORD" -C -h -1 -W -Q "SET NOCOUNT ON; SELECT DB_ID('db_soccer')" | tr -d '[:space:]')
+
+        if [ -z "$$EXISTS" ] || [ "$$EXISTS" = "NULL" ]; then
+          echo "Inicializando db_soccer..."
+          "$$SQLCMD" -S db -U sa -P "$$DB_PASSWORD" -C -b -i /scripts/db_soccer.sql
+        else
+          echo "db_soccer ya existe; se conserva."
+        fi
 
   api:
     build:
@@ -27,7 +71,8 @@ services:
       Jwt__Issuer: api-soccer
       Jwt__Audience: angular-soccer
     depends_on:
-      - db
+      db-init:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   client:
@@ -43,5 +88,3 @@ services:
 volumes:
   sql_server_data:
     name: soccer_sql_server_data
-
-

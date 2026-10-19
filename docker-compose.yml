@@ -42,7 +42,6 @@ services:
 
 volumes:
   sql_server_data:
-    external: true
     name: soccer_sql_server_data
 
 

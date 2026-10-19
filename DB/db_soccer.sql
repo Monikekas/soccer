@@ -60,7 +60,7 @@ INSERT INTO rol (name)
 VALUES ('admin'), ('team');
 GO
 
-CREATE TABLE user (
+CREATE TABLE [user] (
     id INT IDENTITY(1,1) NOT NULL,
     [user] VARCHAR(100) NOT NULL,
     pwd_hash VARCHAR(255) NOT NULL,

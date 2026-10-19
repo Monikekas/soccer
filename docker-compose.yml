@@ -1,0 +1,48 @@
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: soccer-sql-server
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:?Define DB_PASSWORD en .env}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_server_data:/var/opt/mssql
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    ports:
+      - "5188:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__SoccerDb: "Server=db,1433;Database=db_soccer;User Id=sa;Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True"
+      Jwt__Key: "Soccer_Test_Key_2026_MakeItLongEnough_123456789"
+      Jwt__Issuer: api-soccer
+      Jwt__Audience: angular-soccer
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./CLIENT
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  sql_server_data:
+    external: true
+    name: soccer_sql_server_data
+
+

@@ -1,0 +1,91 @@
+<div class="login-container">
+  <mat-card class="login-card">
+
+    <div class="login-header">
+      <h1>Soccer</h1>
+      <p>Login</p>
+    </div>
+
+    <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
+
+      <!-- Usuario -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Usuario</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+
+        <input
+          matInput
+          name="username"
+          [(ngModel)]="username"
+          placeholder="Ingresa tu usuario"
+          required
+          autocomplete="username"
+        />
+      </mat-form-field>
+
+      <!-- Contraseña -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+
+        <input
+          matInput
+          name="password"
+          [(ngModel)]="password"
+          [type]="hidePassword ? 'password' : 'text'"
+          placeholder="Ingresa tu contraseña"
+          required
+          autocomplete="current-password"
+        />
+
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+        >
+          <mat-icon>
+            {{ hidePassword ? 'visibility' : 'visibility_off' }}
+          </mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Mensaje de error -->
+      @if (errorMessage) {
+        <p class="error-message" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </p>
+      }
+
+      <!-- Botón de inicio de sesión -->
+      <button
+      mat-flat-button
+      type="submit"
+      class="login-button"
+      [disabled]="loginForm.invalid || loading"
+    >
+      @if (loading) {
+        Validando...
+      } @else {
+        <ng-container>
+          Iniciar sesión
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </ng-container>
+      }
+    </button>
+
+    </form>
+    <p  class="login-footer">
+          <span>
+            Credenciales de prueba:
+            <strong>admin</strong> / <strong>admin</strong>
+          </span>
+    </p>
+    <p class="login-footer">
+      Soccer · Panel de administración
+    </p>
+
+  </mat-card>
+</div>

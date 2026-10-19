@@ -1,0 +1,183 @@
+
+<div class="home-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <span>SOCCER</span>
+    </a>
+
+    <nav class="topbar-actions">
+      <a mat-flat-button routerLink="/login">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Acceso administrador
+      </a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="leagues-section" id="ligas">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">DESCUBRE</span>
+          <h2>Ligas</h2>
+          <p>Selecciona una liga para consultar sus equipos.</p>
+        </div>
+
+        @if (!loadingLeagues && !errorLeagues) {
+          <span class="league-count">
+            {{ leagues.length }} ligas
+          </span>
+        }
+      </div>
+
+      @if (loadingLeagues) {
+        <div class="feedback-message">
+          <mat-icon>hourglass_empty</mat-icon>
+          <span>Consultando ligas...</span>
+        </div>
+      }
+
+      @if (errorLeagues) {
+        <div class="feedback-message error-message">
+          <mat-icon>error_outline</mat-icon>
+          <span>No fue posible cargar las ligas.</span>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="loadLeagues()"
+          >
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      }
+
+      @if (!loadingLeagues && !errorLeagues && leagues.length === 0) {
+        <div class="feedback-message">
+          <mat-icon>emoji_events</mat-icon>
+          <span>No hay ligas disponibles.</span>
+        </div>
+      }
+
+      @if (!loadingLeagues && !errorLeagues && leagues.length > 0) {
+        <div class="league-layout">
+          <div class="league-list">
+            @for (league of leagues; track league.id) {
+              <button
+                type="button"
+                class="league-item"
+                [class.active]="selectedLeague?.id === league.id"
+                [attr.aria-pressed]="selectedLeague?.id === league.id"
+                (click)="selectLeague(league)"
+              >
+                <span class="league-icon">
+                  <mat-icon>emoji_events</mat-icon>
+                </span>
+
+                <span class="league-info">
+                  <strong>{{ league.name }}</strong>
+                  <small>{{ league.country }}</small>
+                </span>
+
+                <mat-icon class="league-arrow">
+                  chevron_right
+                </mat-icon>
+              </button>
+            }
+          </div>
+
+          <div class="teams-panel">
+            @if (selectedLeague; as league) {
+              <div class="teams-heading">
+                <div>
+                  <span class="section-kicker">
+                    {{ league.startDate | date:'dd/MM/yyyy' }}
+                    -
+                    {{ league.endDate | date:'dd/MM/yyyy' }}
+                  </span>
+
+                  <h3>{{ league.name }}</h3>
+                  <p>Equipos participantes</p>
+                </div>
+
+                @if (!loadingTeams && !errorTeams) {
+                  <span class="team-count">
+                    {{ teams.length }} equipos
+                  </span>
+                }
+              </div>
+
+              @if (loadingTeams) {
+                <div class="feedback-message">
+                  <mat-icon>hourglass_empty</mat-icon>
+                  <span>Consultando equipos...</span>
+                </div>
+              }
+
+              @if (errorTeams) {
+                <div class="feedback-message error-message">
+                  <mat-icon>error_outline</mat-icon>
+                  <span>
+                    No fue posible cargar los equipos de esta liga.
+                  </span>
+
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="loadTeamsByLeague(league.id)"
+                  >
+                    <mat-icon>refresh</mat-icon>
+                    Reintentar
+                  </button>
+                </div>
+              }
+
+              @if (!loadingTeams && !errorTeams) {
+                <div class="teams-grid">
+                  @for (team of teams; track team.id; let i = $index) {
+                    <mat-card class="team-card">
+                      <div
+                        class="team-emblem"
+                        [style.--team-color]="getTeamColor(i)"
+                      >
+                        <mat-icon>sports_soccer</mat-icon>
+                      </div>
+
+                      <div class="team-details">
+                        <strong>{{ team.name }}</strong>
+                        <span>{{ team.country }}</span>
+
+                        <small>
+                          <mat-icon>groups</mat-icon>
+                          {{ team.playersQuantity }} jugadores
+                        </small>
+                      </div>
+
+                      <mat-icon class="team-chevron">
+                        chevron_right
+                      </mat-icon>
+                    </mat-card>
+                  } @empty {
+                    <div class="empty-teams">
+                      <mat-icon>sports_soccer</mat-icon>
+                      <strong>Sin equipos registrados</strong>
+                      <p>
+                        Esta liga todavía no tiene equipos disponibles.
+                      </p>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    </section>
+  </main>
+
+  <footer class="footer">
+    
+    <span>version 1</span>
+    <span>© {{ currentYear }}</span>
+  </footer>
+</div>

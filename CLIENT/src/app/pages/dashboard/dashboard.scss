@@ -1,0 +1,138 @@
+.dashboard-container {
+  width: 100%;
+  max-width: 1800px;
+  margin: 0;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+}
+
+.dashboard-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+/* Distribución principal: izquierda y derecha */
+.dashboard-content {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.65fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+}
+
+.dashboard-section {
+  min-width: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.section-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+/* Tarjetas */
+.leagues-grid,
+.teams-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.league-card,
+.team-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.league-card {
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.league-card.selected {
+  border: 2px solid #1976d2;
+}
+
+.league-card-header,
+.team-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.league-card-header h3,
+.team-card-header h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.league-card p,
+.team-card p {
+  overflow-wrap: anywhere;
+}
+
+.teams-header {
+  margin-bottom: 18px;
+}
+
+/* En pantallas medianas */
+@media (max-width: 900px) {
+  .dashboard-content {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 16px;
+  }
+
+  .dashboard-container {
+    padding: 18px;
+  }
+}
+
+/* En móvil, apilar las secciones */
+@media (max-width: 650px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+
+  .dashboard-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+
+  .dashboard-header,
+  .section-header {
+    align-items: stretch;
+  }
+
+  .dashboard-header button,
+  .section-header button {
+    width: 100%;
+  }
+}

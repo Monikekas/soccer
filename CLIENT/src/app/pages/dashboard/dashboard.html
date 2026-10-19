@@ -1,0 +1,254 @@
+
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div>
+      <h1>Administrador de ligas, equipos e inscripciones.</h1>
+    </div>
+
+    <button
+      mat-stroked-button
+      color="warn"
+      (click)="logout()"
+    >
+      <mat-icon>logout</mat-icon>
+      Cerrar sesión
+    </button>
+  </header>
+
+  <div class="dashboard-content">
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div>
+          <h2>Ligas</h2>
+          <p>Selecciona una liga para ver sus equipos.</p>
+        </div>
+
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="addLeague()"
+        >
+          <mat-icon>add</mat-icon>
+          Agregar liga
+        </button>
+      </div>
+
+      @if (loadingLeagues) {
+        <mat-card>
+          <mat-card-content>
+            Cargando ligas...
+          </mat-card-content>
+        </mat-card>
+      } @else if (leagues.length === 0) {
+        <mat-card>
+          <mat-card-content>
+            <p>No hay ligas registradas.</p>
+
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="addLeague()"
+            >
+              Registrar primera liga
+            </button>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="leagues-grid">
+          @for (league of leagues; track league.id) {
+            <mat-card
+              class="league-card"
+              [class.selected]="selectedLeague?.id === league.id"
+              (click)="selectLeague(league)"
+            >
+              <mat-card-content>
+                <div class="league-card-header">
+                  <div>
+                    <h3>{{ league.name }}</h3>
+                    <p>{{ league.country }}</p>
+                  </div>
+
+                  <div class="team-actions">
+                    <button
+                      mat-icon-button
+                      aria-label="Editar liga"
+                      matTooltip="Editar liga"
+                      [disabled]="removingLeagueId === league.id"
+                      (click)="editLeague(league); $event.stopPropagation()"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      aria-label="Eliminar liga"
+                      matTooltip="Eliminar liga"
+                      [disabled]="removingLeagueId === league.id"
+                      (click)="deleteLeague(league); $event.stopPropagation()"
+                    >
+                      @if (removingLeagueId === league.id) {
+                        <mat-icon>hourglass_empty</mat-icon>
+                      } @else {
+                        <mat-icon>delete</mat-icon>
+                      }
+                    </button>
+                  </div>
+                </div>
+
+                <p>
+                  <strong>Inicio:</strong>
+                  {{ league.startDate | date:'dd/MM/yyyy' }}
+                </p>
+
+                <p>
+                  <strong>Fin:</strong>
+                  {{ league.endDate | date:'dd/MM/yyyy' }}
+                </p>
+
+                <span>
+                  {{ league.enabled ? 'Habilitada' : 'Deshabilitada' }}
+                </span>
+
+                @if (selectedLeague?.id === league.id) {
+                  <p>
+                    <mat-icon inline>check_circle</mat-icon>
+                    Liga seleccionada
+                  </p>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div>
+          <h2>Equipos inscritos</h2>
+
+          @if (selectedLeague) {
+            <p>
+              Equipos asociados a {{ selectedLeague.name }}.
+            </p>
+          } @else {
+            <p>Selecciona una liga para consultar sus equipos.</p>
+          }
+        </div>
+
+        <button
+          mat-flat-button
+          color="primary"
+          [disabled]="!selectedLeague || loadingTeams"
+          (click)="addTeam()"
+        >
+          <mat-icon>add</mat-icon>
+          Agregar equipo a esta liga
+        </button>
+      </div>
+
+      @if (!selectedLeague && !loadingLeagues) {
+        <mat-card>
+          <mat-card-content>
+            Selecciona una liga de la columna izquierda.
+          </mat-card-content>
+        </mat-card>
+      } @else if (loadingTeams) {
+        <mat-card>
+          <mat-card-content>
+            Consultando equipos...
+          </mat-card-content>
+        </mat-card>
+      } @else if (selectedLeague && teams.length === 0) {
+        <mat-card>
+          <mat-card-content>
+            <mat-icon>groups</mat-icon>
+
+            <h3>Sin equipos asociados</h3>
+
+            <p>
+              Esta liga todavía no tiene equipos.
+              Puedes asociar uno existente o crear uno nuevo.
+            </p>
+
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="addTeam()"
+            >
+              <mat-icon>add</mat-icon>
+              Agregar primer equipo
+            </button>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="teams-grid">
+          @for (team of teams; track team.id) {
+            <mat-card class="team-card">
+              <mat-card-content>
+                <div class="team-card-header">
+                  <div>
+                    <h3>{{ team.name }}</h3>
+                    <p>{{ team.country }}</p>
+                  </div>
+
+                  <div class="team-actions">
+                    <button
+                      mat-icon-button
+                      aria-label="Editar equipo"
+                      matTooltip="Editar equipo"
+                      [disabled]="removingTeamId === team.id || deletingTeamId === team.id"
+                      (click)="editTeam(team); $event.stopPropagation()"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      aria-label="Remover equipo de la liga"
+                      matTooltip="Remover de esta liga"
+                      [disabled]="removingTeamId === team.id || deletingTeamId === team.id"
+                      (click)="removeTeam(team); $event.stopPropagation()"
+                    >
+                      @if (removingTeamId === team.id) {
+                        <mat-icon>hourglass_empty</mat-icon>
+                      } @else {
+                        <mat-icon>link_off</mat-icon>
+                      }
+                    </button>
+
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      aria-label="Eliminar equipo definitivamente"
+                      matTooltip="Eliminar equipo definitivamente"
+                      [disabled]="removingTeamId === team.id || deletingTeamId === team.id"
+                      (click)="deleteTeam(team); $event.stopPropagation()"
+                    >
+                      @if (deletingTeamId === team.id) {
+                        <mat-icon>hourglass_empty</mat-icon>
+                      } @else {
+                        <mat-icon>delete_forever</mat-icon>
+                      }
+                    </button>
+                  </div>
+                </div>
+
+                <p>
+                  <strong>Personas:</strong>
+                  {{ team.playersQuantity }}
+                </p>
+
+                <span>
+                  {{ team.enabled ? 'Habilitado' : 'Deshabilitado' }}
+                </span>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</div>

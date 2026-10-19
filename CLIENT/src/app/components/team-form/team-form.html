@@ -1,0 +1,190 @@
+
+<h2 mat-dialog-title>
+  {{ data ? 'Editar equipo' : 'Agregar equipo' }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre del equipo</mat-label>
+
+      <input
+        matInput
+        formControlName="name"
+        [matAutocomplete]="teamAutocomplete"
+        placeholder="Escribe para buscar un equipo"
+        autocomplete="off"
+      />
+
+      <mat-autocomplete
+        #teamAutocomplete="matAutocomplete"
+        (optionSelected)="onTeamSelected($event)"
+      >
+        @for (team of filteredTeams; track team.id) {
+          <mat-option [value]="team.name">
+            <div class="team-option">
+              <span>{{ team.name }}</span>
+              <small>ID {{ team.id }}</small>
+            </div>
+          </mat-option>
+        }
+
+        @if (
+            !data &&
+            form.controls.name.value.trim().length >= 2 &&
+            searchCompleted &&
+            filteredTeams.length === 0 &&
+            !loadingTeams &&
+            !teamsError
+          ) {
+            <mat-option disabled>
+              No se encontraron coincidencias.
+              Puedes crear un equipo nuevo.
+            </mat-option>
+          }
+      </mat-autocomplete>
+
+      @if (
+        form.controls.name.hasError('required') &&
+        form.controls.name.touched
+      ) {
+        <mat-error>
+          El nombre del equipo es obligatorio.
+        </mat-error>
+      }
+
+      @if (form.controls.name.hasError('duplicate')) {
+        <mat-error>
+          {{
+            data
+              ? 'Ya existe otro equipo con ese nombre. Escribe uno diferente.'
+              : 'Este nombre ya existe. Selecciona el equipo existente.'
+          }}
+        </mat-error>
+      }
+    </mat-form-field>
+
+    @if (loadingTeams) {
+      <div class="status-message">
+        Consultando equipos existentes...
+      </div>
+    }
+
+    @if (teamsError) {
+      <div class="status-message error">
+        {{ teamsError }}
+      </div>
+    }
+
+    @if (
+      !data &&
+      !loadingTeams &&
+      !teamsError &&
+      searchCompleted &&
+      form.controls.name.value.trim().length >= 2
+    ) {
+      <div
+        class="status-message"
+        [class.existing]="isExistingTeamSelected"
+        [class.warning]="!!exactTeam && !isExistingTeamSelected"
+        [class.new-team]="!exactTeam"
+      >
+        {{ statusMessage }}
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>País</mat-label>
+
+      <input
+        matInput
+        formControlName="country"
+        placeholder="Ej. México"
+      />
+
+      @if (
+        form.controls.country.hasError('required') &&
+        form.controls.country.touched
+      ) {
+        <mat-error>
+          El país es obligatorio.
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Número de jugadores</mat-label>
+
+      <input
+        matInput
+        type="number"
+        formControlName="playersQuantity"
+        min="1"
+        placeholder="Ej. 25"
+      />
+
+      @if (
+        form.controls.playersQuantity.hasError('required') &&
+        form.controls.playersQuantity.touched
+      ) {
+        <mat-error>
+          El número de jugadores es obligatorio.
+        </mat-error>
+      }
+
+      @if (
+        form.controls.playersQuantity.hasError('min') &&
+        form.controls.playersQuantity.touched
+      ) {
+        <mat-error>
+          Debe ser al menos 1.
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-checkbox formControlName="enabled">
+      Equipo habilitado
+    </mat-checkbox>
+
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      type="button"
+      (click)="cancel()"
+    >
+      Cancelar
+    </button>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="
+        loadingTeams ||
+        !!teamsError ||
+        form.invalid ||
+        (
+          form.controls.name.value.trim().length >= 2 &&
+          !searchCompleted
+        ) ||
+        (
+          !!duplicateTeam
+        ) ||
+        (
+          !data &&
+          !!exactTeam &&
+          !isExistingTeamSelected
+        )
+      "
+    >
+      {{
+        data
+          ? 'Guardar cambios'
+          : (isExistingTeamSelected ? 'Asignar equipo' : 'Guardar equipo')
+      }}
+    </button>
+  </mat-dialog-actions>
+</form>

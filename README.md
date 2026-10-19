@@ -23,17 +23,9 @@ Aplicación de gestión de ligas, equipos e inscripciones.
 Clona el repositorio y entra en la carpeta del proyecto:
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/Monikekas/soccer.git
 cd soccer
 ```
-
-Crea el archivo de variables de entorno:
-
-```bash
-cp .env.example .env
-```
-
-Edita `.env` y configura `DB_PASSWORD` con una contraseña de prueba válida para SQL Server.
 
 ## Iniciar los servicios
 
